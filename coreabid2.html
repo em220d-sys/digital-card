@@ -370,9 +370,12 @@
   function websiteLabel(c) { return c.websiteLabel || prettyUrl(c.website); }
 
   function saveContact(c) {
+    const familyName = c.name.slice(0, 1);
+    const givenName = c.name.slice(1);
     const lines = [
       'BEGIN:VCARD',
       'VERSION:3.0',
+      `N:${familyName};${givenName};;;`,
       `FN:${c.name}`,
       `ORG:${c.company}`,
       `TITLE:${c.title}`,
