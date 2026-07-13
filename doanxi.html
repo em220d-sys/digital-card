@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>디지털명함</title>
+<title>디지털명함-서동준</title>
 <style>
   :root {
     --paper: #EEF0F4;
@@ -468,7 +468,7 @@
     }
   };
 
-  const DEFAULT_ID = '';
+  const DEFAULT_ID = 'doanxi';
   const params = new URLSearchParams(location.search);
   const explicitId = params.get('id');
   const initialId = (explicitId && CARDS[explicitId]) ? explicitId : ((DEFAULT_ID && CARDS[DEFAULT_ID]) ? DEFAULT_ID : null);
