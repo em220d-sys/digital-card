@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>디지털 명함 · 서동준</title>
+<style>
+  :root {
+    --paper: #EEF0F4;
+    --surface: #FFFFFF;
+    --surface-2: #F7F8FA;
+    --ink: #12141B;
+    --muted: #68707E;
+    --line: #E4E7EC;
+    --kakao: #FEE500;
+    --kakao-ink: #3C1E1E;
+    --shadow: rgba(18, 20, 27, 0.14);
+    --accent: #26418F;
+    --accent-2: #16265C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0A0B0F;
+      --surface: #15171E;
+      --surface-2: #1B1E27;
+      --ink: #EDEEF3;
+      --muted: #8A90A0;
+      --line: #272A35;
+      --kakao-ink: #221200;
+      --shadow: rgba(0, 0, 0, 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0A0B0F;
+    --surface: #15171E;
+    --surface-2: #1B1E27;
+    --ink: #EDEEF3;
+    --muted: #8A90A0;
+    --line: #272A35;
+    --kakao-ink: #221200;
+    --shadow: rgba(0, 0, 0, 0.5);
+  }
+  :root[data-theme="light"] {
+    --paper: #EEF0F4;
+    --surface: #FFFFFF;
+    --surface-2: #F7F8FA;
+    --ink: #12141B;
+    --muted: #68707E;
+    --line: #E4E7EC;
+    --kakao-ink: #3C1E1E;
+    --shadow: rgba(18, 20, 27, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+      var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 28px 14px 60px;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.3s ease;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  button { font-family: inherit; }
+
+  .stage { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+
+  .demo-banner {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .switcher {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .switcher::-webkit-scrollbar { display: none; }
+  .switcher button {
+    flex: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 8px 10px 9px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .switcher button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .switcher button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  .card {
+    background: var(--surface);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px -18px var(--shadow), 0 2px 8px -2px var(--shadow);
+    border: 1px solid var(--line);
+  }
+
+  .banner {
+    position: relative;
+    height: 112px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    overflow: hidden;
+  }
+  .banner::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 42px; height: 42px;
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0) 42%, rgba(255,255,255,0.4) 50%, rgba(0,0,0,0.15) 54%, var(--surface) 58%);
+  }
+  .banner .tagline {
+    position: absolute;
+    left: 24px; top: 18px;
+    color: rgba(255,255,255,0.86);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .identity { padding: 0 24px; margin-top: -40px; }
+  .seal {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 8px 18px -6px var(--shadow);
+  }
+  .seal::before {
+    content: "";
+    position: absolute; inset: 6px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0.55;
+  }
+  .seal.has-photo::before { display: none; }
+  .seal-mark { font-size: 1.9rem; font-weight: 800; color: var(--accent); }
+  .seal-photo { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+
+  .name-row { margin-top: 14px; }
+  .name-row h1 { margin: 0; font-size: 1.375rem; font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
+  .name-row .role { margin: 4px 0 0; font-size: 0.875rem; color: var(--muted); font-weight: 500; }
+
+  .section { padding: 18px 24px; }
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  .greeting { background: var(--surface-2); margin: 4px 20px 0; border-radius: 14px; padding: 16px 18px; }
+  .greeting p { margin: 0; font-size: 0.9375rem; line-height: 1.65; white-space: pre-line; }
+
+  .notice {
+    margin: 14px 20px 0;
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .notice .notice-tag {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  .notice p { margin: 0; font-size: 0.875rem; line-height: 1.6; white-space: pre-line; }
+  .notice.collapsed p {
+    max-height: 6.4em;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  }
+  .notice-toggle {
+    display: block;
+    margin: 8px 0 0 auto;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .actions {
+    margin: 18px 24px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .actions a {
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    padding: 14px 6px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .actions a:not(:last-child) { border-right: 1px solid var(--line); }
+  .icon-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .actions a.call .icon-circle, .actions a.sms .icon-circle { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+  .actions a.kakao .icon-circle { background: var(--kakao); color: var(--kakao-ink); }
+  .icon-circle svg { width: 18px; height: 18px; }
+
+  .copy-link {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin: 10px 24px 0;
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    padding: 8px;
+    cursor: pointer;
+    width: calc(100% - 48px);
+  }
+  .copy-link svg { width: 14px; height: 14px; }
+  .copy-link:hover { color: var(--ink); }
+
+  .contact-list { margin: 6px 24px 0; border-top: 1px solid var(--line); }
+  .contact-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 2px;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    gap: 12px;
+  }
+  .contact-row .label { display: flex; align-items: center; gap: 8px; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .contact-row .label svg { width: 15px; height: 15px; color: var(--accent); }
+  .contact-row .value { font-size: 0.9375rem; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+
+  .message-box { margin-top: 4px; }
+  .field { margin-bottom: 12px; }
+  .field textarea, .field input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    padding: 8px 2px;
+    resize: none;
+    outline: none;
+  }
+  .field textarea:focus, .field input:focus { border-bottom-color: var(--accent); }
+  .field textarea::placeholder, .field input::placeholder { color: var(--muted); }
+
+  .btn-submit {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--kakao);
+    color: var(--kakao-ink);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .btn-submit svg { width: 17px; height: 17px; }
+  .btn-submit:active { transform: scale(0.99); }
+
+  .hint { margin: 10px 2px 0; font-size: 0.75rem; line-height: 1.5; color: var(--muted); }
+
+  .footer { padding: 16px 24px 22px; border-top: 1px solid var(--line); margin-top: 6px; }
+  .footer p { margin: 0; font-size: 0.75rem; color: var(--muted); }
+
+  .toast {
+    position: fixed;
+    left: 50%; bottom: 26px;
+    transform: translate(-50%, 12px);
+    background: var(--ink);
+    color: var(--surface);
+    padding: 11px 18px;
+    border-radius: 100px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast, .btn-submit { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="demo-banner" id="demoBanner">예시 데이터입니다 — 실제 연락처와 오픈카톡 링크로 교체한 뒤 전달하세요. 아래 탭에서 업체별 명함을 미리 볼 수 있어요.</div>
+  <nav class="switcher" id="switcher" aria-label="업체별 명함 선택"></nav>
+  <main class="card" id="cardRoot"></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const ICONS = {
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1v3.4c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4.1c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1L6.6 10.8z"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>',
+    sms: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><circle cx="8" cy="11" r="0.6" fill="currentColor" stroke="none"/><circle cx="12" cy="11" r="0.6" fill="currentColor" stroke="none"/><circle cx="16" cy="11" r="0.6" fill="currentColor" stroke="none"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M11 6l1.5-1.5a3.54 3.54 0 0 1 5 5L16 11"/><path d="M13 18l-1.5 1.5a3.54 3.54 0 0 1-5-5L8 13"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M3 6l9 7 9-7"/></svg>',
+    external: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg>'
+  };
+
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  function withProtocol(url) { return /^https?:\/\//i.test(url) ? url : `https://${url}`; }
+  function websiteLabel(c) { return c.websiteLabel || prettyUrl(c.website); }
+  function prettyUrl(url) { return url.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, ''); }
+
+  // ── 업체별 명함 데이터 : 실제 배포 전 phone / email / kakaoUrl 을 교체하세요 ──
+  const CARDS = {
+    beyondd: {
+      shortName: '비욘드디',
+      tagline: 'REAL ESTATE',
+      mark: '비',
+      company: '주식회사 비욘드디',
+      name: '서동준',
+      title: '차장',
+      phone: '010-9325-3263',
+      email: 'dongzun0523@naver.com',
+      kakaoUrl: 'https://open.kakao.com/o/s20fhODi',
+      website: '',
+      bannerImage: '',
+      photo: 'image/서동준.jpg',
+      notice: '예시 공지: 이 영역에 진행 중인 프로젝트나 중요 안내사항을 자유롭게 적을 수 있어요.',
+      greeting: '안녕하세요, 주식회사 비욘드디 서동준 차장입니다.\n부동산 시행 관련 문의는 아래 연락처로 편하게 연락 주세요.',
+      accent: '#26418F',
+      accent2: '#16265C'
+    },
+    coreabid: {
+      shortName: '고려입찰',
+      tagline: 'BID CONSULTING',
+      mark: '고',
+      company: '주식회사 고려입찰',
+      name: '서동준',
+      title: '대표',
+      phone: '010-9325-3263',
+      email: 'coreabid@naver.com',
+      kakaoUrl: 'https://open.kakao.com/o/sNRbgODi',
+      website: 'https://www.coreabid.kr',
+      bannerImage: 'image/고려입찰.png',
+      photo: 'image/서동준.jpg',
+      notice: '대표가 직접 분석 관리하여 최저가 낙찰성공보수료 고려입찰!\n낙찰로 보여드리겠습니다!',
+      greeting: '안녕하세요, 주식회사 고려입찰 대표 서동준입니다.\n전자입찰 컨설팅 관련 상담은 아래 연락처로 문의해 주세요.',
+      accent: '#1F6E5C',
+      accent2: '#123F35'
+    },
+    coreabid2: {
+      shortName: '고려입찰2',
+      tagline: 'BID CONSULTING',
+      mark: '고',
+      company: '주식회사 고려입찰',
+      name: '강준호',
+      title: '컨설턴트',
+      phone: '010-2888-3263',
+      email: 'coreabid@naver.com',
+      kakaoUrl: 'https://open.kakao.com/o/sNRbgODi',
+      website: 'https://www.coreabid.kr',
+      bannerImage: 'image/고려입찰.png',
+      photo: '',
+      notice: '대표가 직접 분석 관리하여 최저가 낙찰성공보수료 고려입찰!\n낙찰로 보여드리겠습니다!',
+      greeting: '안녕하세요, 주식회사 고려입찰 강준호입니다.\n전자입찰 컨설팅 관련 상담은 아래 연락처로 문의해 주세요.',
+      accent: '#1F6E5C',
+      accent2: '#123F35'
+    },
+    airguard: {
+      shortName: '에어가드',
+      tagline: 'AIR MANAGEMENT',
+      mark: '에',
+      company: '주식회사 에어가드',
+      name: '서동준',
+      title: '경영지원팀',
+      phone: '010-9325-3263',
+      email: 'airguard@airguard.co.kr',
+      kakaoUrl: 'https://open.kakao.com/o/s20fhODi',
+      website: 'http://에어가드.kr',
+      bannerImage: 'image/에어가드.png',
+      photo: 'image/서동준.jpg',
+      notice: '• 인명구조기구 "공기호흡기" 유지관리 토탈 서비스 : 충전 · 재검사 · 위생·폐기·공기품질·판매 및 A/S\n• 고압가스 전문 재검사기관 지정 : KGS AC 414 2023 고압가스용 복합재료용기 재검사\n• 고압가스제조(충전) 신고 증명서 : 압축공기 : Air\n• 고압가스운반자등록증명서 : 공기호흡기 용기 운반 전용 차량',
+      greeting: '안녕하세요, 주식회사 에어가드 경영지원팀 서동준입니다.\n견적 및 거래 관련 문의는 아래 연락처로 부탁드립니다.',
+      accent: '#1080A6',
+      accent2: '#0B5C74'
+    },
+    doanxi: {
+      shortName: '도안자이',
+      tagline: 'RESIDENCE SALES',
+      mark: '도',
+      company: '도안자이센텀리체',
+      name: '서동준',
+      title: '분양상담사',
+      phone: '010-9325-3263',
+      email: 'em220d@gmail.com',
+      kakaoUrl: 'https://open.kakao.com/o/sxc6gODi',
+      website: 'https://doan-xi-landing.vercel.app/',
+      websiteLabel: '홈페이지 접속',
+      bannerImage: 'image/도안자이.webp',
+      photo: 'image/서동준.jpg',
+      notice: '도안신도시 최고층 랜드마크 도안자이 로얄동호수 마감임박!\n\n도안신도시 마지막 부지 대단지 자이 브랜드 아파트, 2,293세대~\n\n[자이 프리미엄 특별혜택]\n◆ 계약금 1천만원 ◆\n◆ 계약금 10% 3회 분납제 ◆\n◆ 유상옵션 무상제공(일부 한정)\n◆ 호실지정 로얄동호수!!\n◆ 중도금 납입전 전매 가능!!\n\n[입지 및 프리미엄]\n도안 2단계의 마지막 입지\n자이 프리미엄, 2,293세대 대단지\n서남부스포츠타운 착공 수혜(대전의 잠실)\n대전도시철도 2호선(예정) 역세권\n안전한 도보통학, 초·중·고교 신설(예정)\n\n■ 방문 주소 : 대전시 유성구 용계동 667-6번지\n\n▶100% 예약방문제로 운영됩니다.\n▶입구에서 명함을 꼭 보여주세요!\n\n방문예약/문의해주세요!!',
+      greeting: '안녕하세요, 도안자이센텀리체 분양상담사 서동준입니다.\n분양 문의는 아래 연락처로 언제든 연락 주세요.',
+      accent: '#6A3F73',
+      accent2: '#452A4C'
+    },
+    doanxi2: {
+      shortName: '도안자이2',
+      tagline: 'RESIDENCE SALES',
+      mark: '도',
+      company: '도안자이센텀리체',
+      name: '강준호',
+      title: '분양상담사',
+      phone: '010-2888-3263',
+      email: '',
+      kakaoUrl: 'https://open.kakao.com/o/sxc6gODi',
+      website: 'https://doan-xi-landing.vercel.app/',
+      websiteLabel: '홈페이지 접속',
+      bannerImage: 'image/도안자이.webp',
+      photo: '',
+      notice: '도안신도시 최고층 랜드마크 도안자이 로얄동호수 마감임박!\n\n도안신도시 마지막 부지 대단지 자이 브랜드 아파트, 2,293세대~\n\n[자이 프리미엄 특별혜택]\n◆ 계약금 1천만원 ◆\n◆ 계약금 10% 3회 분납제 ◆\n◆ 유상옵션 무상제공(일부 한정)\n◆ 호실지정 로얄동호수!!\n◆ 중도금 납입전 전매 가능!!\n\n[입지 및 프리미엄]\n도안 2단계의 마지막 입지\n자이 프리미엄, 2,293세대 대단지\n서남부스포츠타운 착공 수혜(대전의 잠실)\n대전도시철도 2호선(예정) 역세권\n안전한 도보통학, 초·중·고교 신설(예정)\n\n■ 방문 주소 : 대전시 유성구 용계동 667-6번지\n\n▶100% 예약방문제로 운영됩니다.\n▶입구에서 명함을 꼭 보여주세요!\n\n방문예약/문의해주세요!!',
+      greeting: '안녕하세요, 도안자이센텀리체 분양상담사 강준호입니다.\n분양 문의는 아래 연락처로 언제든 연락 주세요.',
+      accent: '#6A3F73',
+      accent2: '#452A4C'
+    }
+  };
+
+  const params = new URLSearchParams(location.search);
+  const initialId = params.get('id');
+  const isDemo = !initialId || !CARDS[initialId];
+  let currentKey = (initialId && CARDS[initialId]) ? initialId : Object.keys(CARDS)[0];
+
+  const root = document.getElementById('cardRoot');
+  const switcherEl = document.getElementById('switcher');
+  const demoBanner = document.getElementById('demoBanner');
+
+  function renderSwitcher() {
+    if (!isDemo) { switcherEl.remove(); demoBanner.remove(); return; }
+    switcherEl.innerHTML = Object.entries(CARDS).map(([key, c]) =>
+      `<button type="button" data-key="${key}" class="${key === currentKey ? 'active' : ''}">${c.shortName}</button>`
+    ).join('');
+  }
+
+  function shareUrl(key) {
+    return `${location.origin}${location.pathname}?id=${key}`;
+  }
+
+  function renderCard() {
+    const c = CARDS[currentKey];
+    document.documentElement.style.setProperty('--accent', c.accent);
+    document.documentElement.style.setProperty('--accent-2', c.accent2);
+    document.title = `${c.company} · ${c.name} 디지털 명함`;
+
+    const bannerStyle = c.bannerImage
+      ? ` style="background-image: linear-gradient(135deg, ${hexToRgba(c.accent, 0.55)}, ${hexToRgba(c.accent2, 0.8)}), url('${c.bannerImage}'); background-size: cover; background-position: center;"`
+      : '';
+
+    const noticeHtml = c.notice ? `
+      <div class="notice collapsed" id="noticeBox">
+        <span class="notice-tag">공지</span>
+        <p id="noticeText">${c.notice}</p>
+        <button type="button" class="notice-toggle" id="noticeToggle" hidden>더보기 ▾</button>
+      </div>` : '';
+
+    const sealContent = c.photo
+      ? `<img src="${c.photo}" alt="${c.name}" class="seal-photo">`
+      : `<span class="seal-mark">${c.mark}</span>`;
+
+    const websiteRow = c.website ? `
+        <a class="contact-row" href="${withProtocol(c.website)}" target="_blank" rel="noopener">
+          <span class="label">${ICONS.external}WEB</span>
+          <span class="value">${websiteLabel(c)}</span>
+        </a>` : '';
+
+    const emailRow = c.email ? `
+        <a class="contact-row" href="mailto:${c.email}">
+          <span class="label">${ICONS.mail}E-MAIL</span>
+          <span class="value">${c.email}</span>
+        </a>` : '';
+
+    root.innerHTML = `
+      <div class="banner"${bannerStyle}><span class="tagline">${c.tagline}</span></div>
+      <div class="identity">
+        <div class="seal${c.photo ? ' has-photo' : ''}">${sealContent}</div>
+        <div class="name-row">
+          <h1>${c.name}</h1>
+          <p class="role">${c.title} · ${c.company}</p>
+        </div>
+      </div>
+
+      <div class="greeting"><p>${c.greeting}</p></div>
+      ${noticeHtml}
+
+      <div class="actions">
+        <a class="call" href="tel:${c.phone}">
+          <span class="icon-circle">${ICONS.phone}</span>전화
+        </a>
+        <a class="sms" href="sms:${c.phone}">
+          <span class="icon-circle">${ICONS.sms}</span>SMS
+        </a>
+        <a class="kakao" href="${c.kakaoUrl}" target="_blank" rel="noopener">
+          <span class="icon-circle">${ICONS.chat}</span>오픈카톡 문의
+        </a>
+      </div>
+      <button type="button" class="copy-link" id="copyLinkBtn">${ICONS.link}이 명함 링크 복사</button>
+
+      <div class="contact-list">
+        <a class="contact-row" href="tel:${c.phone}">
+          <span class="label">${ICONS.phone}TEL</span>
+          <span class="value">${c.phone}</span>
+        </a>
+        ${emailRow}${websiteRow}
+      </div>
+
+      <div class="section message-box">
+        <p class="eyebrow">MESSAGE</p>
+        <div class="field">
+          <textarea id="msgInput" rows="3" placeholder="문의하실 내용을 간단히 적어주세요"></textarea>
+        </div>
+        <div class="field">
+          <input id="timeInput" type="text" placeholder="통화 희망 시간 (예: 평일 오후 2~4시)">
+        </div>
+        <button type="button" class="btn-submit" id="submitInquiry">${ICONS.send}카카오톡으로 문의 보내기</button>
+        <p class="hint">버튼을 누르면 입력한 내용이 자동으로 복사돼요. 오픈채팅방이 열리면 붙여넣기만 하면 끝!</p>
+      </div>
+
+      <div class="footer"><p>${c.company}</p></div>
+    `;
+
+    const noticeBox = root.querySelector('#noticeBox');
+    if (noticeBox) {
+      const noticeText = root.querySelector('#noticeText');
+      const noticeToggle = root.querySelector('#noticeToggle');
+      requestAnimationFrame(() => {
+        if (noticeText.scrollHeight > noticeText.clientHeight + 2) {
+          noticeToggle.hidden = false;
+          noticeToggle.addEventListener('click', () => {
+            const stillCollapsed = noticeBox.classList.toggle('collapsed');
+            noticeToggle.textContent = stillCollapsed ? '더보기 ▾' : '접기 ▴';
+          });
+        }
+      });
+    }
+
+    root.querySelector('#copyLinkBtn').addEventListener('click', () => copyText(shareUrl(currentKey), '이 명함 링크가 복사되었습니다.'));
+    root.querySelector('#submitInquiry').addEventListener('click', () => {
+      const msg = root.querySelector('#msgInput').value.trim();
+      const time = root.querySelector('#timeInput').value.trim();
+      let text = `[${c.company} 문의]\n`;
+      text += msg ? `- 문의내용: ${msg}\n` : '';
+      text += time ? `- 통화 희망 시간: ${time}\n` : '';
+      if (!msg && !time) text = `[${c.company}] 문의드립니다.`;
+      copyText(text.trim(), '문의 내용이 복사되었습니다. 채팅창에 붙여넣어 주세요.');
+      window.setTimeout(() => window.open(c.kakaoUrl, '_blank', 'noopener'), 900);
+    });
+  }
+
+  function copyText(text, message) {
+    const done = () => showToast(message);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    cb();
+  }
+
+  let toastTimer;
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  switcherEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-key]');
+    if (!btn) return;
+    currentKey = btn.dataset.key;
+    history.replaceState(null, '', `?id=${currentKey}`);
+    renderSwitcher();
+    renderCard();
+  });
+
+  renderSwitcher();
+  renderCard();
+</script>
+</body>
+</html>
